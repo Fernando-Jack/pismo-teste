@@ -1,0 +1,7 @@
+{
+  "name": "teste-pismo-compra",
+  "version": "0.1.0",
+  "description": "Descrição API compras",
+  "title": "Descrição API compras",
+  "url" : "https://verticle-compra.herokuapp.com/api/v1"
+}

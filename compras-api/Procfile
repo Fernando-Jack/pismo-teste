@@ -1,2 +1,2 @@
-web:    java -jar target/compra-api-0.0.1-SNAPSHOT-fat.jar
+web:    java -jar target/compras-api-0.0.1-SNAPSHOT-fat.jar
 

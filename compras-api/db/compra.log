@@ -1,0 +1,4 @@
+/*C6*/SET SCHEMA PUBLIC
+DELETE FROM COMPRA WHERE ID=96
+COMMIT
+CREATE TABLE IF NOT EXISTS compra (id INTEGER IDENTITY, itemId integer, userId integer, price integer)

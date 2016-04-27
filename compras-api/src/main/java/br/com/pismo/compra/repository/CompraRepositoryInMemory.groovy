@@ -17,14 +17,14 @@ class CompraRepositoryInMemory implements CompraRepository {
 	}
 
 	@Override
-	public int createCompra(productId, price, itemId, userId) {
-		def compra = new Compra(productId, price, itemId, userId)
+	public int createCompra(itemId, userId, price, nextHandler) {
+		def compra = new Compra(price, itemId, userId)
 		compras << compra		
 		return compra.id;
 	}
 
 	@Override
-	public Compra getCompraById(Object id) {
+	public Compra getCompraById(Object id, nextHandler) {
 		return compras.find{it.id == id};
 	}
 

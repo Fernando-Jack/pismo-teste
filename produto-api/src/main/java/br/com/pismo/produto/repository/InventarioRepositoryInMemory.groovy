@@ -11,19 +11,19 @@ class InventarioRepositoryInMemory implements InventarioRepository {
 	}
 	
 	@Override
-	public int addItem(String category) {
+	public int addItem(String category, nextHandler) {
 		def item = new InventarioItem(category)
 		items << item		
 		return item.id;
 	}
 
 	@Override
-	public InventarioItem getInventarioItemById(int id) {
+	public InventarioItem getInventarioItemById(int id, nextHandler) {
 		return items.find{it.id == id};
 	}
 
 	@Override
-	public int consumeInventarioItemByCategory(String category) {
+	public int consumeInventarioItemByCategory(String category, nextHandler) {
 		def item = items.find{it.category == category}
 		
 		if (item == null)
@@ -39,6 +39,12 @@ class InventarioRepositoryInMemory implements InventarioRepository {
 		items << new InventarioItem("xbox")
 		items << new InventarioItem("playstation")
 		items << new InventarioItem("playstation")
+	}
+
+	@Override
+	public void getAll(Object nextHandler) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -16,37 +16,25 @@ Linguagem: Groovy
 Frameworks/Ferramentas: 
 	- Vertx
 	- Vertx Web
-	- Junit
 	- RestAssured
+        - Spock
 	- vertx Unit
 	- JWT auth
+	- Driver JDBC
 	- Maven
 
-Banco(s) de dados: Sem banco (Temporarimente in-memory)
+Banco(s) de dados: Driver JDBC com hsql
 
 Nuvem :
 	Heroku
 https://verticle-compra.herokuapp.com
 https://verticle-produto.herokuapp.com
 
-Mecanismo de controle:
-	JWT auth (em implementação)
-
-Endpoints
-get'/api/v1/compra*'
-get'/api/v1/compra/:id'
-post'/api/v1/compra/:id'	
-get'/api/v1/produto*'
-get'/api/v1/produto'
-post'/api/v1/produto'
-get'/api/v1/produto/:id'
-put'/api/v1/produto/:id'
-delete'/api/v1/produto/:id'
-post'/api/v1/produto/:produto/inventario'
-put'/api/v1/produto/:produto/inventario'
+Endpoints: Cada projeto tem um pasta apidoc na raiz. Com uma descrição bem simples.
 
 Pendências:
+Controle de acesso.
+Utilização de objetos groovy.
 Sistema de log.
 Esquema de exceptions.
 Docs.
-Controle de acesso
