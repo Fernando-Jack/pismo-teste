@@ -1,6 +1,8 @@
 package br.com.pismo.produto.repository
 
+import io.vertx.core.Launcher
 import io.vertx.core.json.JsonArray
+import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.sql.UpdateResult
 
@@ -10,54 +12,43 @@ import br.com.pismo.produto.entity.InventarioItem
 
 class InventarioRepositoryJDBCSQL implements InventarioRepository {
 
-	def jdbc
+	def private jdbc
+	def private connection
+	def private vertxLogger = LoggerFactory.getLogger(Launcher.class.getName());
 
 	def public InventarioRepositoryJDBCSQL(jdbc){
+		vertxLogger.info("Your InventarioRepositoryJDBCSQL is started!");
 		this.jdbc = jdbc
 		createDB()
 	}
 
-
-
 	@Override
 	public void getAll(Object nextHandler) {
-		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
-			selectAll(connection, nextHandler)
-		})
+		selectAll(connection, nextHandler)
 	}
 
 	@Override
 	public int addItem(String category, nextHandler) {
 		def item = new InventarioItem(category)
-		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
-			insert(item, connection, nextHandler)
-		});
+		insert(item, connection, nextHandler)
 		return 0
 	}
 
 	@Override
 	public InventarioItem getInventarioItemById(int id, nextHandler) {
-		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
-			select(id.toString(), connection, nextHandler)
-		})
+		select(id.toString(), connection, nextHandler)
 		return null
 	}
 
 	@Override
 	public int consumeInventarioItemByCategory(String category, nextHandler) {
-		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
-			consume(category, connection, nextHandler)
-		});
+		consume(category, connection, nextHandler)
 		return 0
 	}
 
 	def createDB(){
 		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
+			connection = ar.result()
 			connection.execute(
 					"CREATE TABLE IF NOT EXISTS inventario (id INTEGER IDENTITY, category varchar(100), status varchar(1));DELETE FROM inventario;", { a ->
 						if (a.failed()) {
@@ -70,12 +61,11 @@ class InventarioRepositoryJDBCSQL implements InventarioRepository {
 	}
 
 	private void insert(InventarioItem item, SQLConnection connection, nextHandler) {
-
 		String sql = "INSERT INTO inventario (category, status) VALUES ?, ?"
 		connection.updateWithParams(sql,
 				new JsonArray().add(item.getCategory()).add("D"), { ar ->
 					if (ar.failed()) {
-						print ar.cause()
+						vertxLogger.info(ar.cause())
 						nextHandler(-1)
 						connection.close();
 						return;
@@ -95,7 +85,6 @@ class InventarioRepositoryJDBCSQL implements InventarioRepository {
 	private void select(String id, SQLConnection connection, nextHandler) {
 		connection.queryWithParams("SELECT * FROM inventario WHERE id=?", new JsonArray().add(id), { ar ->
 			if (ar.failed()) {
-				print ar.cause
 				nextHandler(-1);
 			} else {
 				if (ar.result().getNumRows() >= 1) {
@@ -108,10 +97,14 @@ class InventarioRepositoryJDBCSQL implements InventarioRepository {
 		});
 	}
 
-	private void selectAll(SQLConnection connection, nextHandler) {
+	private void selectAll(SQLConnection connection, nextHandler) {		
 		connection.queryWithParams("SELECT * FROM inventario WHERE status = ?", new JsonArray().add("D"), { result ->
-			def produtos = result.result().getRows().stream().map({new InventarioItem(it)}).collect(Collectors.toList())
-			nextHandler(produtos)
+			if(result.failed()){
+				nextHandler(-1)
+			}else{
+				def produtos = result.result().getRows().stream().map({new InventarioItem(it)}).collect(Collectors.toList())
+				nextHandler(produtos)
+			}
 		});
 	}
 

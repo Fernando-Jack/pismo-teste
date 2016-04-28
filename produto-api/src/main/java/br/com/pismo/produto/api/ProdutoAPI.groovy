@@ -1,16 +1,18 @@
 package br.com.pismo.produto.api
 
+import io.vertx.core.Launcher
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.handler.BodyHandler
 import br.com.pismo.produto.entity.Produto
 import br.com.pismo.produto.service.ProdutoService
 
 class ProdutoAPI {
 
+	def private vertxLogger = LoggerFactory.getLogger(ProdutoAPI.class.getName());
 	def private produtoService
 	def private router
 	def private eventBus
@@ -42,13 +44,17 @@ class ProdutoAPI {
 	 *
 	 */
 	def private void getAll(RoutingContext routingContext) {
+		vertxLogger.warn("getAll product api called")
 		eventBus.send(produtoService.ALL_PRODUCTS_ADDRESS, "", {result->
+			vertxLogger.warn("getAll eventBus callback called")
 			if (result.succeeded()) {
+				vertxLogger.warn("getAll eventBus callback success")
 				routingContext.response()
 						.putHeader("content-type", "application/json;  charset=utf-8")
 						.setStatusCode(200)
 						.end(result.result().body())
 			}else{
+				vertxLogger.warn("getAll eventBus callback failed")
 				routingContext.response()
 						.setStatusCode(500)
 						.end(result.cause().toString())

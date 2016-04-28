@@ -2,6 +2,7 @@ package br.com.pismo.produto
 
 import groovy.json.JsonBuilder
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.DeploymentOptions
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
@@ -47,8 +48,9 @@ public class AppServer extends AbstractVerticle {
 	private configInventoryAPI(JDBCClient jdbc, EventBus eventBus, Router router) {
 		def inventoryVerticle = new InventarioService(
 				new InventarioRepositoryJDBCSQL(jdbc))
-
-		vertx.deployVerticle(inventoryVerticle)
+		
+		DeploymentOptions options = new DeploymentOptions().setWorker(true);
+		vertx.deployVerticle(inventoryVerticle, options)
 
 		def InventarioAPI inventarioAPI =
 				new InventarioAPI(
@@ -63,8 +65,9 @@ public class AppServer extends AbstractVerticle {
 	private configProductAPI(JDBCClient jdbc, EventBus eventBus, Router router) {
 		def produtoVerticle = new ProdutoService(
 				new ProdutoRepositoryJDBCSQL(jdbc))
-
-		vertx.deployVerticle(produtoVerticle)
+		
+		DeploymentOptions options = new DeploymentOptions().setWorker(true);
+		vertx.deployVerticle(produtoVerticle, options)
 
 		def ProdutoAPI produtoAPI =
 				new ProdutoAPI(

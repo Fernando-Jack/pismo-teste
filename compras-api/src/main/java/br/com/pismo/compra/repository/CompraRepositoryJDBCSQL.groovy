@@ -8,7 +8,8 @@ import br.com.pismo.compra.entity.Compra
 
 class CompraRepositoryJDBCSQL implements CompraRepository {
 
-	def jdbc
+	def private jdbc
+	def private connection
 
 	def public CompraRepositoryJDBCSQL(JDBCClient jdbc){
 		this.jdbc = jdbc
@@ -18,26 +19,20 @@ class CompraRepositoryJDBCSQL implements CompraRepository {
 	@Override
 	public int createCompra(Object itemId, Object userId, Object price, nextHandler) {
 		def compra = new Compra(itemId, userId, price)
-		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
-			insert(compra, connection, nextHandler)
-		});
+		insert(compra, connection, nextHandler)
 		return 0
 	}
 
 
 	@Override
 	public Compra getCompraById(Object id, nextHandler) {
-		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
-			select(id.toString(), connection, nextHandler)
-		})
+		select(id.toString(), connection, nextHandler)
 		return null
 	}
 
 	def createDB(){
 		jdbc.getConnection({ ar ->
-			SQLConnection connection = ar.result()
+			connection = ar.result()
 			connection.execute(
 					"DELETE FROM compra;CREATE TABLE IF NOT EXISTS compra (id INTEGER IDENTITY, itemId integer, userId integer, price integer)", { a ->
 						if (a.failed()) {
@@ -53,13 +48,13 @@ class CompraRepositoryJDBCSQL implements CompraRepository {
 		String sql = "INSERT INTO compra (itemId, userId, price) VALUES ?, ?, ?";
 		connection.updateWithParams(sql,
 				new JsonArray().add(compra.getItemId()).add(compra.getUserId()).add(compra.getPrice()), { ar ->
-					if (ar.failed()) {						
+					if (ar.failed()) {
 						print ar.cause()
 						nextHandler(-1)
 						connection.close();
 						return;
 					}
-					
+
 					UpdateResult result = ar.result();
 					def w = new Compra()
 					w.with{

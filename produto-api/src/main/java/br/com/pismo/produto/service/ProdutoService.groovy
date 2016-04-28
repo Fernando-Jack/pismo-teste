@@ -1,11 +1,11 @@
 package br.com.pismo.produto.service
 
-import groovy.json.JsonBuilder
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
+import io.vertx.core.Launcher
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.jdbc.JDBCClient
+import io.vertx.core.logging.LoggerFactory
 import br.com.pismo.produto.entity.Produto
 import br.com.pismo.produto.repository.ProdutoRepository
 
@@ -22,6 +22,7 @@ public class ProdutoService extends AbstractVerticle {
 	def static public final String VERTICLE_ADDRESS 	= "groovy:br.com.pismo.produto.service.ProdutoService"
 	
 	private final ObjectMapper mapper = new ObjectMapper()
+	def private vertxLogger = LoggerFactory.getLogger(ProdutoService.class.getName());
 	
 	def ProdutoService(ProdutoRepository repository){
 		this.repository = repository
@@ -31,7 +32,9 @@ public class ProdutoService extends AbstractVerticle {
 	public void start(Future<Void> fut) throws Exception {		
 		
 		vertx.eventBus().consumer(ALL_PRODUCTS_ADDRESS, { message ->
+			vertxLogger.warn("get all products message arrieved")
 			this.getAllProdutos({results ->
+				vertxLogger.warn("get all products handler called")
 				def response = mapper.writeValueAsString(results)
 				message.reply(response)
 			})
