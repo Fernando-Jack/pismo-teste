@@ -1,12 +1,12 @@
 package br.com.pismo.teste
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.unit.Async
-import io.vertx.ext.unit.TestContext
 import spock.lang.Specification
 import spock.util.concurrent.AsyncConditions
 import br.com.pismo.produto.AppServer
@@ -15,9 +15,10 @@ import br.com.pismo.produto.entity.Produto
 
 public class InventarioVerticleAPISpec extends Specification{
 
-	private Vertx vertx
-	private int port
-	def clientHttp
+	private vertx
+	private port
+	private clientHttp
+	private tokenKey
 
 	def setup(){
 		vertx = Vertx.vertx()
@@ -26,8 +27,10 @@ public class InventarioVerticleAPISpec extends Specification{
 		socket.close()
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port))
 		vertx.deployVerticle(AppServer.class.getName(), options)
-		clientHttp = vertx.createHttpClient()
-		sleep(1000)
+		clientHttp = vertx.createHttpClient()		
+		sleep(500)
+		authenticateHttpClient(clientHttp, port, "localhost", "/api/v1/produto/login",{token -> tokenKey = ("Bearer " + token)})
+		sleep(500)
 	}
 
 	def cleanup(){
@@ -64,7 +67,7 @@ public class InventarioVerticleAPISpec extends Specification{
 			conditions.evaluate{
 				responseCreateItem = response
 				response.bodyHandler({ body ->
-					conditions.evaluate{						
+					conditions.evaluate{
 						createdItem = Json.decodeValue(body.toString(), InventarioItem.class)
 					}
 				})
@@ -76,6 +79,7 @@ public class InventarioVerticleAPISpec extends Specification{
 			clientHttp.post(port, host, apiInventario)
 					.putHeader("content-type", "application/json")
 					.putHeader("content-length", lengthJsonInvetory)
+					.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 					.handler(inventoryResponseHandler)
 					.write(jsonInvetotyToBeCreated).end()
 		}
@@ -96,9 +100,10 @@ public class InventarioVerticleAPISpec extends Specification{
 		clientHttp.post(port, host, api)
 				.putHeader("content-type", "application/json")
 				.putHeader("content-length", lengthJsonProduct)
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler(createResponseHandler).write(jsonProductToBeCreated).end()
 
-		and: "Await for results"		
+		and: "Await for results"
 		conditions.await()
 
 		then:"The post product response should have the content-type as json and status as 201"
@@ -144,18 +149,19 @@ public class InventarioVerticleAPISpec extends Specification{
 
 		def inventoryConsumeResponseHandler = { response ->
 			conditions.evaluate{
-				responseConsumedItem = response			
+				responseConsumedItem = response
 				response.bodyHandler({ body ->
 					conditions.evaluate{
 						def jsonSlurper = new JsonSlurper()
 						consumedItem = jsonSlurper.parseText(body.toString())
-					}				
+					}
 				})
 			}
 		}
 		def consumeItemFromInventory = {
 			def apiInventario = api + "/" + createdProduct.getCategory() + "/inventario"
 			clientHttp.put(port, host, apiInventario)
+					.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 					.handler(inventoryConsumeResponseHandler).end()
 		}
 
@@ -177,6 +183,7 @@ public class InventarioVerticleAPISpec extends Specification{
 					.putHeader("content-type", "application/json")
 					.putHeader("content-length", lengthJsonInvetory)
 					.handler(inventoryResponseHandler)
+					.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 					.write(jsonInvetotyToBeCreated).end()
 		}
 
@@ -196,6 +203,7 @@ public class InventarioVerticleAPISpec extends Specification{
 		clientHttp.post(port, host, api)
 				.putHeader("content-type", "application/json")
 				.putHeader("content-length", lengthJsonProduct)
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler(createResponseHandler).write(jsonProductToBeCreated).end()
 
 		and: "Await for results"
@@ -212,18 +220,35 @@ public class InventarioVerticleAPISpec extends Specification{
 		and: "The created item info should be equals to the one created"
 		assert createdItem.getCategory() == productCategory
 		assert createdItem.getId() != null
-		
+
 		and:"The consumed inventory response should have the content-type as json and status as 200"
 		assert responseConsumedItem.statusCode() == 200
 		assert responseConsumedItem.headers().get("content-type").contains("application/json") == true
-		
-		and: "The consumed item should return valid id"
-			assert consumedItem.id != -1
-			assert consumedItem.id != null
-			assert consumedItem.id instanceof Integer
-		
-		and: "The consumed item should has the same category of the created item"
-			assert consumedItem.category == createdProduct.getCategory()
 
+		and: "The consumed item should return valid id"
+		assert consumedItem.id != -1
+		assert consumedItem.id != null
+		assert consumedItem.id instanceof Integer
+
+		and: "The consumed item should has the same category of the created item"
+		assert consumedItem.category == createdProduct.getCategory()
+	}
+
+	def authenticateHttpClient(httpClient, port, host, api ,tokenHandler){
+		def userName = 'admin'
+		def password = '123'
+		def jsonAuth =  JsonOutput.toJson([username: userName, password: password]).toString()
+		
+		httpClient.post(port, host, api)
+				.putHeader("content-type", "application/json")
+				.putHeader("content-length", jsonAuth.length().toString())
+				.handler({ response ->
+					response.bodyHandler({ body ->					
+							def responseToken = body.toString()
+							tokenHandler(responseToken)
+					})
+				})
+				.write(jsonAuth)				
+				.end()
 	}
 }

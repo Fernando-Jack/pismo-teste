@@ -14,6 +14,7 @@ import io.vertx.ext.jdbc.JDBCClient
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.JWTAuthHandler
+import io.vertx.ext.web.handler.StaticHandler
 import br.com.pismo.produto.api.InventarioAPI
 import br.com.pismo.produto.api.ProdutoAPI
 import br.com.pismo.produto.repository.InventarioRepositoryJDBCSQL
@@ -49,7 +50,7 @@ public class AppServer extends AbstractVerticle {
 		def inventoryVerticle = new InventarioService(
 				new InventarioRepositoryJDBCSQL(jdbc))
 		
-		DeploymentOptions options = new DeploymentOptions().setWorker(true);
+		def options = new DeploymentOptions().setWorker(true);
 		vertx.deployVerticle(inventoryVerticle, options)
 
 		def InventarioAPI inventarioAPI =
@@ -66,7 +67,7 @@ public class AppServer extends AbstractVerticle {
 		def produtoVerticle = new ProdutoService(
 				new ProdutoRepositoryJDBCSQL(jdbc))
 		
-		DeploymentOptions options = new DeploymentOptions().setWorker(true);
+		def options = new DeploymentOptions().setWorker(true);
 		vertx.deployVerticle(produtoVerticle, options)
 
 		def ProdutoAPI produtoAPI =
@@ -93,11 +94,13 @@ public class AppServer extends AbstractVerticle {
 	}
 
 	private defineResponseForBaseURL(router) {
+		def handler = StaticHandler.create()
+		router.route("/apidoc/*").handler(handler)
 		router.route('/').handler( {routingContext ->
 			HttpServerResponse response = routingContext.response()
 			response
 					.putHeader("content-type", "text/html")
-					.end("<h1>Produto API</h1>")
+					.end("<h1>Produto API - access /apidoc/ for more information </h1>")
 		})
 	}
 
@@ -118,34 +121,22 @@ public class AppServer extends AbstractVerticle {
 				)
 	}
 
+	/**
+	 * @api {post} /produto/login
+	 * @apiGroup Autenticação	 
+	 *
+	 * @apiSuccess {String} status Retorna um token de acesso
+	 *
+	 */
 	private defineRouterAuth(Router router) {
-		
-//		JWTAuth jwt = JWTAuth.create(vertx, new JsonObject()
-//			.put("keyStore", new JsonObject()
-//				.put("type", "jceks")
-//				.put("path", "keystoreS.jceks")
-//				.put("password", "secret")));	
-//
-//		router.route("/apii/*").handler(JWTAuthHandler.create(jwt, "/apii/newToken"));	
-//
-//		router.get("/apii/newToken").handler({ctx -> 
-//		  ctx.response().putHeader("Content-Type", "text/plain");
-//		  ctx.response().end(jwt.generateToken(new JsonObject(), new JWTOptions().setExpiresInSeconds(60L)));
-//		});	
-//
-//		router.get("/apii/protected").handler({ctx -> 
-//		  ctx.response().putHeader("Content-Type", "text/plain");
-//		  ctx.response().end("a secret you should keep for yourself...");
-//		});
-		
-		/*def config = new JsonObject().put("keyStore", new JsonObject()
+		def config = new JsonObject().put("keyStore", new JsonObject()
 				.put("path", "keystore.jceks")
 				.put("type", "jceks")
 				.put("password", "secret"))
 
 		def provider = JWTAuth.create(vertx, config)		
 		
-		router.route("/protected/*").handler(JWTAuthHandler.create(provider,"/protected/test"))
+		router.route("/api/v1/produto/*").handler(JWTAuthHandler.create(provider,"/api/v1/produto/login"))
 		
 		router.post("/api/v1/produto/login").handler({ ctx ->
 			def json = ctx.getBodyAsJson()
@@ -155,9 +146,7 @@ public class AppServer extends AbstractVerticle {
 			} else {
 				ctx.fail(401)
 			}
-		})		*/
+		})		
 	}
-
-
 
 }

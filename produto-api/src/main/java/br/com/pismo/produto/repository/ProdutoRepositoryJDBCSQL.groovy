@@ -111,6 +111,7 @@ class ProdutoRepositoryJDBCSQL implements ProdutoRepository {
 		});
 	}
 
+	//TODO:FH use right log level (trace, debug, info, warn etc.)
 	private void selectAll(SQLConnection connection, nextHandler) {
 		vertxLogger.warn("select all products call")
 		connection.query("SELECT * FROM produto", { result ->

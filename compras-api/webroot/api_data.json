@@ -1,4 +1,27 @@
-define({ "api": [
+[
+  {
+    "type": "post",
+    "url": "/compra/login",
+    "title": "",
+    "group": "Autentica__o",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "status",
+            "description": "<p>Retorna um token de acesso</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "src/main/java/br/com/pismo/compra/AppServer.groovy",
+    "groupTitle": "Autentica__o",
+    "name": "PostCompraLogin"
+  },
   {
     "type": "get",
     "url": "/compra/:id",
@@ -58,4 +81,4 @@ define({ "api": [
     "groupTitle": "Compra",
     "name": "PostCompra"
   }
-] });
+]

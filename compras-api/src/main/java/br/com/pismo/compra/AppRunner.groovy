@@ -1,6 +1,7 @@
 package br.com.pismo.compra;
 
 import groovy.json.JsonBuilder
+import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.JsonObject
@@ -23,7 +24,8 @@ public class AppRunner {
 		def compraVerticle = configureCompraVerticle(router, vertx)
 		def server = new AppServer()
 
-		vertx.deployVerticle(compraVerticle)
+		def options = new DeploymentOptions().setWorker(true);
+		vertx.deployVerticle(compraVerticle, options)
 		vertx.deployVerticle(server)
 	}
 
@@ -31,18 +33,24 @@ public class AppRunner {
 		def config = dataBaseConfig()
 		def jdbc = JDBCClient.createShared(vertx, config, "compra-api")
 		
-		def configHttp = new HttpClientOptions().setSsl(true).setTrustAll(true)		
+		//TODO:FH remove hardcoded. create config-file for port and host
+		def configHttp = new HttpClientOptions()
+				.setDefaultHost("https://verticle-produto.herokuapp.com")
+				.setDefaultPort(443)
 				
-		def compraVerticle = new CompraService(			
+		def httpClient = vertx.createHttpClient(configHttp)
+
+		def compraVerticle = new CompraService(
 				new CompraRepositoryJDBCSQL(jdbc),
-				new InventarioRestIntegration(vertx.createHttpClient(configHttp)))
+				new InventarioRestIntegration(httpClient))
 
 		return compraVerticle
 	}
-	
+
 	private static JsonObject dataBaseConfig() {
 		def json = new JsonBuilder()
 
+		//TODO:FH remove hardcoded. create config-file for connection
 		json{
 			url "jdbc:hsqldb:file:db/compra"
 			driver_class "org.hsqldb.jdbcDriver"

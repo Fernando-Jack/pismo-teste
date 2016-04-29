@@ -1,7 +1,9 @@
 package br.com.pismo.teste 
 
+import groovy.json.JsonOutput
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import spock.lang.Specification
@@ -13,20 +15,19 @@ import br.com.pismo.produto.entity.Produto
 @Stepwise
 public class ProdutoVerticleAPISpec extends Specification {
 
-	private Vertx vertx
-	private int port
-	def clientHttp
+	private vertx
+	private port
+	private clientHttp
+	private tokenKey
 	
 	def setup(){
 		vertx = Vertx.vertx()
-		ServerSocket socket = new ServerSocket(0)
-		port = socket.getLocalPort()
-		socket.close()
-		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port))
-		vertx.deployVerticle(AppServer.class.getName(), options)
+		startServerVerticle()
 		clientHttp = vertx.createHttpClient()
-		sleep(1000)
-	}
+		sleep(500)
+		authenticateHttpClient(clientHttp, port, "localhost", "/api/v1/produto/login",{token -> tokenKey = ("Bearer " + token)})
+		sleep(500)
+	}	
 	
 	def cleanup(){
 		vertx.close()
@@ -66,6 +67,7 @@ public class ProdutoVerticleAPISpec extends Specification {
 			clientHttp.post(port, host, api)
 				.putHeader("content-type", "application/json")
 				.putHeader("content-length", length)
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler(responseHandler).write(jsonProductToBeCreated).end()
 		
 		and: "await for responses"			
@@ -110,6 +112,7 @@ public class ProdutoVerticleAPISpec extends Specification {
 			
 			def verifyExistenceOfCretedProductRequest = {
 				clientHttp.get(port, host, api + "/" + responseCreatedProduct.getId())
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler({ response ->
 					conditions.evaluate{
 						responseGetHelper = response						
@@ -120,6 +123,7 @@ public class ProdutoVerticleAPISpec extends Specification {
 						
 			def deleteCreatedProductRequest = {
 				clientHttp.delete(port, host, api + "/" + responseCreatedProduct.getId())
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler({ response ->
 					conditions.evaluate{
 						responseDeleteHelper = response						
@@ -145,6 +149,7 @@ public class ProdutoVerticleAPISpec extends Specification {
 			clientHttp.post(port, host, api)
 				.putHeader("content-type", "application/json")
 				.putHeader("content-length", length)
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler(createResponseHandler)
 				.write(json)
 				.end()			
@@ -205,6 +210,7 @@ public class ProdutoVerticleAPISpec extends Specification {
 				clientHttp.put(port, host, api + "/" + responseCreatedProduct.getId())
 				.putHeader("content-type", "application/json")
 				.putHeader("content-length", updateLength)
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler({ response ->
 					responseUpdateHelper = response
 					conditions.evaluate{
@@ -235,6 +241,7 @@ public class ProdutoVerticleAPISpec extends Specification {
 		clientHttp.post(port, host, api)
 			.putHeader("content-type", "application/json")
 			.putHeader("content-length", length)
+			.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 			.handler(createResponseHandler)
 			.write(json)
 			.end()
@@ -259,7 +266,37 @@ public class ProdutoVerticleAPISpec extends Specification {
 		and: "The product updated should have the expected info"
 			assert responseUpdatedProduct.getName() == updateProductName
 			assert responseUpdatedProduct.getPrice() == updateProductPrice
-			assert responseUpdatedProduct.getId() == responseCreatedProduct.getId()			
+			assert responseUpdatedProduct.getId() == responseCreatedProduct.getId()	
+	}
+	
+	def authenticateHttpClient(httpClient, port, host, api ,tokenHandler){
+		def userName = 'admin'
+		def password = '123'
+		def jsonAuth =  JsonOutput.toJson([username: userName, password: password]).toString()
 		
+		httpClient.post(port, host, api)
+				.putHeader("content-type", "application/json")
+				.putHeader("content-length", jsonAuth.length().toString())
+				.handler({ response ->
+					response.bodyHandler({ body ->					
+							def responseToken = body.toString()
+							tokenHandler(responseToken)
+					})
+				})
+				.write(jsonAuth)				
+				.end()
+	}
+	
+	private startServerVerticle() {
+		def options = getServerVerticleOptions()
+		vertx.deployVerticle(AppServer.class.getName(), options)
+	}
+
+	private DeploymentOptions getServerVerticleOptions() {
+		ServerSocket socket = new ServerSocket(0)
+		port = socket.getLocalPort()
+		socket.close()
+		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port))
+		return options
 	}
 }

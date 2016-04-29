@@ -1,4 +1,27 @@
-[
+define({ "api": [
+  {
+    "type": "post",
+    "url": "/produto/login",
+    "title": "",
+    "group": "Autentica__o",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "status",
+            "description": "<p>Retorna um token de acesso</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "src/main/java/br/com/pismo/produto/AppServer.groovy",
+    "groupTitle": "Autentica__o",
+    "name": "PostProdutoLogin"
+  },
   {
     "type": "get",
     "url": "/produto/:produto-id/inventario",
@@ -261,4 +284,4 @@
     "groupTitle": "Produto",
     "name": "PutProdutoId"
   }
-]
+] });

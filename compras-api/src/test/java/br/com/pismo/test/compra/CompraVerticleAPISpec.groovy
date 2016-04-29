@@ -1,10 +1,11 @@
 package br.com.pismo.test.compra
 
 import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
 import spock.lang.Specification
@@ -17,18 +18,22 @@ import br.com.pismo.compra.repository.CompraRepositoryJDBCSQL
 import br.com.pismo.compra.service.CompraService
 
 
+//TODO:FH remove hardcoded. create config-file for end-points
 @Stepwise
 public class CompraVerticleAPISpec extends Specification {
 
-	private Vertx vertx
-	private int port
-	def clientHttp	
+	private vertx
+	private port
+	private clientHttp
+	private tokenKey	
 
 	def setup(){
 		vertx = Vertx.vertx()
 		startCompraAPI()
 		clientHttp = vertx.createHttpClient()
 		sleep(1000)
+		authenticateHttpClient(clientHttp, port, "localhost", "/api/v1/compra/login",{token -> tokenKey = ("Bearer " + token)})
+		sleep(500)
 	}
 
 	def cleanup(){
@@ -42,9 +47,11 @@ public class CompraVerticleAPISpec extends Specification {
 		final def expectedPrice = 2000
 		final def expectedUserId = 15
 		final def expectedProductId = 20		
+		//TODO:FH use groovy json object
 		def compraRequestJson = "{\"productId\":10 ,\"userId\":15 , \"price\":2000}"
-
+		
 		and: "The purchase rest URI path"
+		//TODO:FH remove hardcoded. create config-file
 		final def host = "localhost"
 		final def api = "/api/v1/compra"
 
@@ -71,6 +78,7 @@ public class CompraVerticleAPISpec extends Specification {
 		clientHttp.post(port, host, api)
 				.putHeader("content-type", "application/json")
 				.putHeader("content-length", length)
+				.putHeader(HttpHeaders.AUTHORIZATION, tokenKey)
 				.handler(responseHandler).write(jsonPurchaseToBeCreated).end()
 
 		and: "await for responses"
@@ -118,6 +126,7 @@ public class CompraVerticleAPISpec extends Specification {
 	private JsonObject dataBaseConfig() {
 		def json = new JsonBuilder()
 
+		//TODO:FH remove hardcoded. create config-file for connection
 		json{
 			url "jdbc:hsqldb:file:db/compra"
 			driver_class "org.hsqldb.jdbcDriver"
@@ -133,5 +142,23 @@ public class CompraVerticleAPISpec extends Specification {
 		socket.close()
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port))
 		return options
+	}
+	
+	def authenticateHttpClient(httpClient, port, host, api ,tokenHandler){
+		def userName = 'admin'
+		def password = '123'
+		def jsonAuth =  JsonOutput.toJson([username: userName, password: password]).toString()
+		
+		httpClient.post(port, host, api)
+				.putHeader("content-type", "application/json")
+				.putHeader("content-length", jsonAuth.length().toString())
+				.handler({ response ->
+					response.bodyHandler({ body ->
+							def responseToken = body.toString()
+							tokenHandler(responseToken)
+					})
+				})
+				.write(jsonAuth)
+				.end()
 	}
 }
