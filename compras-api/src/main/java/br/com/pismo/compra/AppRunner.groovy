@@ -35,8 +35,10 @@ public class AppRunner {
 		
 		//TODO:FH remove hardcoded. create config-file for port and host
 		def configHttp = new HttpClientOptions()
-				.setDefaultHost("https://verticle-produto.herokuapp.com")
-				.setDefaultPort(443)
+				/*.setDefaultHost("https://verticle-produto.herokuapp.com")
+				.setDefaultPort(443)*/
+				.setDefaultHost("localhost")
+				.setDefaultPort(8080)
 				
 		def httpClient = vertx.createHttpClient(configHttp)
 

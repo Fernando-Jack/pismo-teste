@@ -1,4 +1,11 @@
-/*C5*/SET SCHEMA PUBLIC
-CREATE TABLE IF NOT EXISTS produto (id INTEGER IDENTITY, name varchar(100), price integer,  category varchar(100))
-/*C4*/SET SCHEMA PUBLIC
+/*C17*/SET SCHEMA PUBLIC
 CREATE TABLE IF NOT EXISTS inventario (id INTEGER IDENTITY, category varchar(100), status varchar(1))
+/*C18*/SET SCHEMA PUBLIC
+CREATE TABLE IF NOT EXISTS produto (id INTEGER IDENTITY, name varchar(100), price integer,  category varchar(100))
+INSERT INTO PRODUTO VALUES(1880,'Playstation',2000,'playstation')
+COMMIT
+/*C17*/INSERT INTO INVENTARIO VALUES(334,'playstation','D')
+COMMIT
+DELETE FROM INVENTARIO WHERE ID=334
+INSERT INTO INVENTARIO VALUES(334,'playstation','V')
+COMMIT

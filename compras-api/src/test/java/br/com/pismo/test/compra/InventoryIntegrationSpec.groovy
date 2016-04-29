@@ -130,7 +130,7 @@ class InventoryIntegrationSpec extends Specification {
 		assert consumedItemId.toInteger()
 
 		and: "Verify if the created item id is the same as from the consumed item"
-		assert consumedItemId != createdItem.id
+		assert consumedItemId == createdItem.id
 	}
 
 	//TODO:FH create helper to reuse func

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2016-04-29T18:50:49</date>
+  <millis>1461966649416</millis>
+  <sequence>0</sequence>
+  <logger>com.mchange.v2.log.MLog</logger>
+  <level>INFO</level>
+  <class>com.mchange.v2.log.MLog</class>
+  <method></method>
+  <thread>22</thread>
+  <message>MLog clients using java 1.4+ standard logging.</message>
+</record>
+<record>
+  <date>2016-04-29T18:50:49</date>
+  <millis>1461966649554</millis>
+  <sequence>1</sequence>
+  <logger>com.mchange.v2.c3p0.C3P0Registry</logger>
+  <level>INFO</level>
+  <class>com.mchange.v2.c3p0.C3P0Registry</class>
+  <method></method>
+  <thread>1</thread>
+  <message>Initializing c3p0-0.9.5.2 [built 08-December-2015 22:06:04 -0800; debug? true; trace: 10]</message>
+</record>
+<record>
+  <date>2016-04-29T18:50:50</date>
+  <millis>1461966650868</millis>
+  <sequence>2</sequence>
+  <logger>com.mchange.v2.c3p0.impl.AbstractPoolBackedDataSource</logger>
+  <level>INFO</level>
+  <class>com.mchange.v2.c3p0.impl.AbstractPoolBackedDataSource</class>
+  <method></method>
+  <thread>23</thread>
+  <message>Initializing c3p0 pool... com.mchange.v2.c3p0.ComboPooledDataSource [ acquireIncrement -&gt; 3, acquireRetryAttempts -&gt; 30, acquireRetryDelay -&gt; 1000, autoCommitOnClose -&gt; false, automaticTestTable -&gt; null, breakAfterAcquireFailure -&gt; false, checkoutTimeout -&gt; 0, connectionCustomizerClassName -&gt; null, connectionTesterClassName -&gt; com.mchange.v2.c3p0.impl.DefaultConnectionTester, contextClassLoaderSource -&gt; caller, dataSourceName -&gt; z8kfsx9grqwepfgnzvcc|17fc391b, debugUnreturnedConnectionStackTraces -&gt; false, description -&gt; null, driverClass -&gt; org.hsqldb.jdbcDriver, extensions -&gt; {}, factoryClassLocation -&gt; null, forceIgnoreUnresolvedTransactions -&gt; false, forceSynchronousCheckins -&gt; false, forceUseNamedDriverClass -&gt; false, identityToken -&gt; z8kfsx9grqwepfgnzvcc|17fc391b, idleConnectionTestPeriod -&gt; 0, initialPoolSize -&gt; 3, jdbcUrl -&gt; jdbc:hsqldb:file:db/compra, maxAdministrativeTaskTime -&gt; 0, maxConnectionAge -&gt; 0, maxIdleTime -&gt; 0, maxIdleTimeExcessConnections -&gt; 0, maxPoolSize -&gt; 15, maxStatements -&gt; 0, maxStatementsPerConnection -&gt; 0, minPoolSize -&gt; 3, numHelperThreads -&gt; 3, preferredTestQuery -&gt; null, privilegeSpawnedThreads -&gt; false, properties -&gt; {}, propertyCycle -&gt; 0, statementCacheNumDeferredCloseThreads -&gt; 0, testConnectionOnCheckin -&gt; false, testConnectionOnCheckout -&gt; false, unreturnedConnectionTimeout -&gt; 0, userOverrides -&gt; {}, usesTraditionalReflectiveProxies -&gt; false ]</message>
+</record>
+</log>

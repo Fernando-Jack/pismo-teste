@@ -109,8 +109,8 @@ public class AppServer extends AbstractVerticle {
 				.createHttpServer()
 				.requestHandler(router.&accept)
 				.listen(
-				//config().getInteger("http.port", 8080),
-				System.getenv('PORT') as int, '0.0.0.0' ,
+				config().getInteger("http.port", 8080),
+				//System.getenv('PORT') as int, '0.0.0.0' ,
 				{result ->
 					if (result.succeeded()) {
 						fut.complete()
