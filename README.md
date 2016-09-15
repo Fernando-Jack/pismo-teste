@@ -7,7 +7,7 @@ compras-api
 
 Escopo
 
-As api's devem se comunicar para o desenvolvimento de uma funcionalidade: realizar uma venda Todas as definições a seguir devem ser feitas por você, devendo considerar as melhores opções dentro do prazo estipulado, sempre buscando a melhor qualidade possível, lembrando que todas as decisões deverão ser justificadas em uma próxima etapa:
+As api's devem se comunicar para o desenvolvimento de uma funcionalidade: realizar uma venda.
 
 O que foi utilizado
 
@@ -38,3 +38,27 @@ Utilização de objetos groovy.
 Sistema de log. 
 Esquema de exceptions. 
 JavaDocs. 
+
+=====================
+
+Develop two distinct Apis:
+
+product-api / shopping-api
+
+Scope
+
+The api must communicate to the development of a feature: making a sale.
+
+What was used:
+
+Language: Groovy
+
+Frameworks / tools: - Vertx - Vertx Web - RestAssured - Spock - Vertx Unit - JWT auth - JDBC - Maven
+
+Database: JDBC Driver with HSQL
+
+Cloud: Heroku https://verticle-compra.herokuapp.com https://verticle-produto.herokuapp.com
+
+Endpoints: Each project has a apidoc folder in the root. With a simple description.
+
+Pending issues: access control. Use of groovy objects. logging system. exceptions scheme. JavaDocs.
